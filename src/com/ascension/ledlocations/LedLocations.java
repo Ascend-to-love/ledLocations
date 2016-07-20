@@ -33,7 +33,7 @@ public class LedLocations {
                 String[] vars = line.split(cvsSplitBy);
 
                 // only count heart pieces
-                if (!vars[0].startsWith("heart")) {
+                if (!vars[0].startsWith("trunk")) {
                     continue;
                 }
 
@@ -210,7 +210,7 @@ public class LedLocations {
         double uz = axis.getZ();
 
         double vx = vec.getX();
-        double vy = vec.getZ();
+        double vy = vec.getY();
         double vz = vec.getZ();
 
         double x = (cos(th) + ux * ux * (1 - cos(th))) * vx

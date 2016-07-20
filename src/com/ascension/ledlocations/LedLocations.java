@@ -18,7 +18,7 @@ public class LedLocations {
     public static long totalPlaced = 0;
 
     public static void main(String[] args) {
-        String csvFile = "/Users/akesich/Documents/Ascension/LEDLocations.csv";
+        String csvFile = "LEDLocations.csv";
         BufferedReader br = null;
         String line;
         String cvsSplitBy = ",";
@@ -32,6 +32,7 @@ public class LedLocations {
                 // use comma as separator
                 String[] vars = line.split(cvsSplitBy);
 
+                // only count heart pieces
                 if (!vars[0].startsWith("heart")) {
                     continue;
                 }

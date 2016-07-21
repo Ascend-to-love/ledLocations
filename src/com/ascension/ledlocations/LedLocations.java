@@ -1,9 +1,6 @@
 package com.ascension.ledlocations;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -17,6 +14,8 @@ public class LedLocations {
 
     public static long totalPlaced = 0;
 
+    public static BufferedWriter outWriter;
+
     public static void main(String[] args) {
         String csvFile = "LEDLocations.csv";
         BufferedReader br = null;
@@ -24,6 +23,15 @@ public class LedLocations {
         String cvsSplitBy = ",";
 
         try {
+            File outFile = new File("led-locations.csv");
+            if (!outFile.exists()) {
+                outFile.createNewFile();
+            }
+
+            FileWriter fw = new FileWriter(outFile.getAbsoluteFile());
+            outWriter = new BufferedWriter(fw);
+
+            outWriter.write("x,y,z\n");
 
             br = new BufferedReader(new FileReader(csvFile));
             br.readLine(); // throw away header line
@@ -33,9 +41,9 @@ public class LedLocations {
                 String[] vars = line.split(cvsSplitBy);
 
                 // only count heart pieces
-                if (!vars[0].startsWith("trunk")) {
-                    continue;
-                }
+//                if (!vars[0].startsWith("trunk")) {
+//                    continue;
+//                }
 
                 System.out.println("Segment name: " + vars[0]);
 
@@ -76,6 +84,7 @@ public class LedLocations {
             }
 
             System.out.printf("Total LEDs placed: %d\n", totalPlaced);
+            outWriter.close();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -111,6 +120,11 @@ public class LedLocations {
             totalPlaced++;
             segmentLeds++;
 //            System.out.printf("%f, %f, %f\n", x, y, z);
+            try {
+                outWriter.write(String.format("%f, %f, %f\n", x, y, z));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         System.out.printf("Leds in segment: %d\n", segmentLeds);
@@ -187,6 +201,11 @@ public class LedLocations {
                         numPlaced++;
                         totalPlaced++;
 //                    System.out.printf("%g %g %g\n", curvePoint.getX(), curvePoint.getY(), curvePoint.getZ());
+                        try {
+                            outWriter.write(String.format("%g, %g, %g\n", curvePoint.getX(), curvePoint.getY(), curvePoint.getZ()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 previousPoint = curvePoint;

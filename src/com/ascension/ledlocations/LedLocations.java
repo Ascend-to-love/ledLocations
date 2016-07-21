@@ -17,7 +17,7 @@ public class LedLocations {
     public static BufferedWriter outWriter;
 
     public static void main(String[] args) {
-        String csvFile = "LEDLocations.csv";
+        String csvFile = "LEDStripLocations.csv";
         BufferedReader br = null;
         String line;
         String cvsSplitBy = ",";

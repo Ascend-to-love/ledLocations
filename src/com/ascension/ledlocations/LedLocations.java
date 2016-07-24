@@ -185,12 +185,15 @@ public class LedLocations {
 
             for (double t = 0; abs(t) < angle; t += direction * 0.0001) {
                 double epsilon = 0.000001;
-                Vector3D arcP1 = parameterizedArc(t - epsilon, radius, r1, normal, center);
-                Vector3D arcP2 = parameterizedArc(t + epsilon, radius, r1, normal, center);
-                Vector3D tangent = arcP2.add(-1, arcP1).normalize();
+                Vector3D arcPep1 = parameterizedArc(t - epsilon, radius, r1, normal, center);
+                Vector3D arcPep2 = parameterizedArc(t + epsilon, radius, r1, normal, center);
+                Vector3D tangent = arcPep2.add(-1, arcPep1).normalize();
 
-                Vector3D radialVec = rotateVector(radialUp, tangent, phi);
-                Vector3D curvePoint = parameterizedArc(t, radius, r1, normal, center).add(radialVec);
+                Vector3D arcP = parameterizedArc(t, radius, r1, normal, center);
+
+                Vector3D arcRadialVec = new Vector3D(1, center, -1, arcP).normalize().scalarMultiply(cylRadius);
+                Vector3D radialVec = rotateVector(arcRadialVec, tangent, phi);
+                Vector3D curvePoint = arcP.add(radialVec);
 
                 if (firstPass) {
                     firstPass = false;

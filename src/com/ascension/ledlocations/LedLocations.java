@@ -31,7 +31,7 @@ public class LedLocations {
             FileWriter fw = new FileWriter(outFile.getAbsoluteFile());
             outWriter = new BufferedWriter(fw);
 
-            outWriter.write("x,y,z\n");
+            outWriter.write("section,right_left,subsection,front_back,strip_number,segment_id,x,y,z,led_number,arc_strip_num,arc_length\n");
 
             br = new BufferedReader(new FileReader(csvFile));
             br.readLine(); // throw away header line
@@ -40,43 +40,44 @@ public class LedLocations {
                 // use comma as separator
                 String[] vars = line.split(cvsSplitBy);
 
-                // only count heart pieces
-//                if (!vars[0].startsWith("trunk")) {
-//                    continue;
-//                }
+                System.out.println("Segment name: " + vars[6]);
 
-                System.out.println("Segment name: " + vars[0]);
-
-                if (vars[1].equals("Arc")) {
+                if (vars[7].equals("Arc")) {
                     arcSegment(vars);
                     continue;
                 }
 
-                if (vars[5].equals("n/a")) {
+                if (vars[11].equals("n/a")) {
                     lineSegment(
-                            Double.parseDouble(vars[2]),
-                            Double.parseDouble(vars[3]),
-                            Double.parseDouble(vars[4]),
                             Double.parseDouble(vars[8]),
                             Double.parseDouble(vars[9]),
-                            Double.parseDouble(vars[10])
+                            Double.parseDouble(vars[10]),
+                            Double.parseDouble(vars[14]),
+                            Double.parseDouble(vars[15]),
+                            Double.parseDouble(vars[16]),
+                            vars,
+                            0
                     );
                 } else {
-                    lineSegment(
-                            Double.parseDouble(vars[2]),
-                            Double.parseDouble(vars[3]),
-                            Double.parseDouble(vars[4]),
-                            Double.parseDouble(vars[5]),
-                            Double.parseDouble(vars[6]),
-                            Double.parseDouble(vars[7])
-                    );
-                    lineSegment(
-                            Double.parseDouble(vars[5]),
-                            Double.parseDouble(vars[6]),
-                            Double.parseDouble(vars[7]),
+                    int startIndex = lineSegment(
                             Double.parseDouble(vars[8]),
                             Double.parseDouble(vars[9]),
-                            Double.parseDouble(vars[10])
+                            Double.parseDouble(vars[10]),
+                            Double.parseDouble(vars[11]),
+                            Double.parseDouble(vars[12]),
+                            Double.parseDouble(vars[13]),
+                            vars,
+                            0
+                    );
+                    lineSegment(
+                            Double.parseDouble(vars[11]),
+                            Double.parseDouble(vars[12]),
+                            Double.parseDouble(vars[13]),
+                            Double.parseDouble(vars[14]),
+                            Double.parseDouble(vars[15]),
+                            Double.parseDouble(vars[16]),
+                            vars,
+                            startIndex
                     );
 
                 }
@@ -101,11 +102,11 @@ public class LedLocations {
         }
     }
 
-    public static void lineSegment(double x1, double y1, double z1, double x2, double y2, double z2) {
+    public static int lineSegment(double x1, double y1, double z1, double x2, double y2, double z2, String[] vars, int startIndex) {
         double dx = x2 - x1;
         double dy = y2 - y1;
         double dz = z2 - z1;
-        int segmentLeds = 0;
+        int segmentLeds = startIndex;
 
         double length = sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2));
 
@@ -117,43 +118,45 @@ public class LedLocations {
             double y = y1 + frac * dy;
             double z = z1 + frac * dz;
 
-            totalPlaced++;
-            segmentLeds++;
 //            System.out.printf("%f, %f, %f\n", x, y, z);
             try {
-                outWriter.write(String.format("%f, %f, %f\n", x, y, z));
+                outWriter.write(String.format("%s,%s,%s,%s,%s,%s,%f,%f,%f,%d\n",
+                        vars[0], vars[1], vars[2], vars[3] ,vars[4], vars[5],  x, y, z, segmentLeds));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            totalPlaced++;
+            segmentLeds++;
         }
 
         System.out.printf("Leds in segment: %d\n", segmentLeds);
+        return segmentLeds;
 
     }
 
     public static void arcSegment(String[] vars) {
         double cylRadius = 95.5 / 2;
-        Vector3D radialUp = Vector3D.PLUS_K.scalarMultiply(cylRadius);
+        //Vector3D radialUp = Vector3D.PLUS_K.scalarMultiply(cylRadius);
 
         Vector3D start = new Vector3D(
-                Double.parseDouble(vars[2]),
-                Double.parseDouble(vars[3]),
-                Double.parseDouble(vars[4])
-        );
-
-        Vector3D end = new Vector3D(
                 Double.parseDouble(vars[8]),
                 Double.parseDouble(vars[9]),
                 Double.parseDouble(vars[10])
         );
 
-        Vector3D center = new Vector3D(
-                Double.parseDouble(vars[13]),
+        Vector3D end = new Vector3D(
+                Double.parseDouble(vars[14]),
                 Double.parseDouble(vars[15]),
-                Double.parseDouble(vars[14])
+                Double.parseDouble(vars[16])
         );
 
-        double radius = Double.parseDouble(vars[12]);
+        Vector3D center = new Vector3D(
+                Double.parseDouble(vars[19]),
+                Double.parseDouble(vars[21]),
+                Double.parseDouble(vars[20])
+        );
+
+        double radius = Double.parseDouble(vars[18]);
 
         System.out.printf("start: %g %g %g\n", start.getX(), start.getY(), start.getZ());
         System.out.printf("end: %g %g %g\n", end.getX(), end.getY(), end.getZ());
@@ -205,7 +208,10 @@ public class LedLocations {
                         totalPlaced++;
 //                    System.out.printf("%g %g %g\n", curvePoint.getX(), curvePoint.getY(), curvePoint.getZ());
                         try {
-                            outWriter.write(String.format("%g, %g, %g\n", curvePoint.getX(), curvePoint.getY(), curvePoint.getZ()));
+                            outWriter.write(String.format("%s,%s,%s,%s,%s,%s,%g,%g,%g,%d,%d,%g\n",
+                                    vars[0], vars[1], vars[2], vars[3], vars[4], vars[5],
+                                    curvePoint.getX(), curvePoint.getY(), curvePoint.getZ(),
+                                    numPlaced, i, t*radius));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

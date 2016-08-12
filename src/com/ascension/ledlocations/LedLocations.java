@@ -47,6 +47,14 @@ public class LedLocations {
                     continue;
                 }
 
+                if (vars[0].equals("trunk")) {
+                    vars[19] = "100000";
+                    vars[20] = "100000";
+                    vars[21] = "0";
+                    arcSegment(vars);
+                    continue;
+                }
+
                 if (vars[11].equals("n/a")) {
                     lineSegment(
                             Double.parseDouble(vars[8]),
@@ -136,7 +144,6 @@ public class LedLocations {
 
     public static void arcSegment(String[] vars) {
         double cylRadius = 95.5 / 2;
-        //Vector3D radialUp = Vector3D.PLUS_K.scalarMultiply(cylRadius);
 
         Vector3D start = new Vector3D(
                 Double.parseDouble(vars[8]),
@@ -152,11 +159,11 @@ public class LedLocations {
 
         Vector3D center = new Vector3D(
                 Double.parseDouble(vars[19]),
-                Double.parseDouble(vars[21]),
-                Double.parseDouble(vars[20])
+                Double.parseDouble(vars[20]),
+                Double.parseDouble(vars[21])
         );
 
-        double radius = Double.parseDouble(vars[18]);
+        double radius = start.distance(center);
 
         System.out.printf("start: %g %g %g\n", start.getX(), start.getY(), start.getZ());
         System.out.printf("end: %g %g %g\n", end.getX(), end.getY(), end.getZ());
@@ -174,9 +181,10 @@ public class LedLocations {
         // assuming that all arc are minor arcs, so if the parametrization takes us farther away
         // from the end point, we must be going the wrong way.
         double direction = 1;
-        if (parameterizedArc(0.01, radius, r1, normal, center).distance(end) > start.distance(end)) {
+        if (parameterizedArc(0.001, radius, r1, normal, center).distance(end) > start.distance(end)) {
             direction = -1;
         }
+        if (vars[7].equals("Line")) direction /= 10.0;
 
         for (int i = 0; i < 10; i++) {
             double curLength = 0.0;
@@ -204,14 +212,14 @@ public class LedLocations {
                     curLength += curvePoint.distance(previousPoint);
 
                     if (curLength > numPlaced * spacing) {
-                        numPlaced++;
-                        totalPlaced++;
 //                    System.out.printf("%g %g %g\n", curvePoint.getX(), curvePoint.getY(), curvePoint.getZ());
                         try {
                             outWriter.write(String.format("%s,%s,%s,%s,%s,%s,%g,%g,%g,%d,%d,%g\n",
-                                    vars[0], vars[1], vars[2], vars[3], vars[4], vars[5],
+                                    vars[0], vars[1], vars[2], vars[3], vars[4], vars[5]+"-"+i,
                                     curvePoint.getX(), curvePoint.getY(), curvePoint.getZ(),
                                     numPlaced, i, t*radius));
+                            numPlaced++;
+                            totalPlaced++;
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

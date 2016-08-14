@@ -164,11 +164,14 @@ public class LedLocations {
         );
 
         double radius = start.distance(center);
+        int phiOffset = Integer.parseInt(vars[22]);
 
         System.out.printf("start: %g %g %g\n", start.getX(), start.getY(), start.getZ());
         System.out.printf("end: %g %g %g\n", end.getX(), end.getY(), end.getZ());
         System.out.printf("center: %g %g %g\n", center.getX(), center.getY(), center.getZ());
         System.out.printf("radius: %g\n", radius);
+        System.out.printf("phi offset: %d\n", phiOffset);
+
 
         Vector3D r1 = new Vector3D(1, start, -1, center);
         r1 = r1.normalize();
@@ -217,7 +220,7 @@ public class LedLocations {
                             outWriter.write(String.format("%s,%s,%s,%s,%s,%s,%g,%g,%g,%d,%d,%g\n",
                                     vars[0], vars[1], vars[2], vars[3], vars[4], vars[5]+"-"+i,
                                     curvePoint.getX(), curvePoint.getY(), curvePoint.getZ(),
-                                    numPlaced, i, t*radius));
+                                    numPlaced, (i+phiOffset)%10, t*radius));
                             numPlaced++;
                             totalPlaced++;
                         } catch (IOException e) {

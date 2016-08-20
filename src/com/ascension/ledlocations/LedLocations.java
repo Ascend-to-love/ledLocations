@@ -64,10 +64,11 @@ public class LedLocations {
                             Double.parseDouble(vars[15]),
                             Double.parseDouble(vars[16]),
                             vars,
-                            0
+                            0,
+                            0.0
                     );
                 } else {
-                    int startIndex = lineSegment(
+                    double[] lineInfo = lineSegment(
                             Double.parseDouble(vars[8]),
                             Double.parseDouble(vars[9]),
                             Double.parseDouble(vars[10]),
@@ -75,7 +76,8 @@ public class LedLocations {
                             Double.parseDouble(vars[12]),
                             Double.parseDouble(vars[13]),
                             vars,
-                            0
+                            0,
+                            0.0
                     );
                     lineSegment(
                             Double.parseDouble(vars[11]),
@@ -85,7 +87,8 @@ public class LedLocations {
                             Double.parseDouble(vars[15]),
                             Double.parseDouble(vars[16]),
                             vars,
-                            startIndex
+                            (int)Math.round(lineInfo[0]),
+                            lineInfo[1]
                     );
 
                 }
@@ -110,7 +113,7 @@ public class LedLocations {
         }
     }
 
-    public static int lineSegment(double x1, double y1, double z1, double x2, double y2, double z2, String[] vars, int startIndex) {
+    public static double[] lineSegment(double x1, double y1, double z1, double x2, double y2, double z2, String[] vars, int startIndex, double startOffset) {
         double dx = x2 - x1;
         double dy = y2 - y1;
         double dz = z2 - z1;
@@ -120,8 +123,8 @@ public class LedLocations {
 
         System.out.printf("Length: %f\n", length);
 
-        for (int i = 0; i * spacing < length; i++) {
-            double frac = (i * spacing) / length;
+        for (int i = 0; (i * spacing + startOffset) < length; i++) {
+            double frac = (i * spacing + startOffset) / length;
             double x = x1 + frac * dx;
             double y = y1 + frac * dy;
             double z = z1 + frac * dz;
@@ -138,7 +141,7 @@ public class LedLocations {
         }
 
         System.out.printf("Leds in segment: %d\n", segmentLeds);
-        return segmentLeds;
+        return new double[]{segmentLeds, segmentLeds * spacing - length};
 
     }
 
